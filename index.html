@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fuel Efficiency Predictor for Cars</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Fuel Efficiency Predictor for Cars">
+  <meta name="author" content="Kalyan S. Mupparaju">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/zenburn.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Fuel Efficiency Predictor for Cars</h1>
+    <h2>Shiny App Based on MTCARS dataset in R</h2>
+    <p>Kalyan S. Mupparaju<br/>Coursera Developing Data Products Course Project</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>What does this application do?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>This app predicts the mileage(miles per gallon) of a car which has a certain weight, quater mile time and transmission type.</p>
+
+<h2>How to use this application?</h2>
+
+<ul>
+<li>The sliders in the side bar can be used to input the weight(lb/1000) and quater mile time(seconds). </li>
+<li>The radio buttons can be used to select the type of transmission. </li>
+<li>Based on these inputs the miles per gallon (mpg) estimate of the car is shown in the Prediction Outcome tab of the main panel.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>How was this predictor app built?</h2>
+  </hgroup>
+  <article data-timings="">
+    <h3>Data Processing</h3>
+
+<p>This predictor is trained on the mtcars data set in R. The data set was first partitioned into training and testing data sets. </p>
+
+<h3>Building The Model</h3>
+
+<ul>
+<li>A <em>linear regression model</em> was fit on the training data. </li>
+<li>Outcome: miles per gallon (mpg)</li>
+<li>Predictors: weight(wt), quater mile time(qsec), type of transmission(am) and  interaction term between type of transmission and weight(am:wt)</li>
+</ul>
+
+<h3>Applying the model on test set and estimating out of sample error</h3>
+
+<ul>
+<li>The linear model built on the training set is applied to the test set. </li>
+<li>The root mean squared error is used as the error measure.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Code showing entire model building and calculation of RMS error on test set.</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">suppressMessages(library(caret))                    #Loading required libraries
+library(datasets)                               
+data(&quot;mtcars&quot;)                                      #Loading mtcars dataset
+set.seed(101)                                       #Setting seed for reproducablity
+mtTrainId &lt;- createDataPartition(mtcars$mpg,p = 0.7, list = FALSE)
+mtTrain &lt;- mtcars[mtTrainId,]                       #Preparing training set
+mtTest &lt;- mtcars[-mtTrainId,]                       #Preparing test set
+modelfit &lt;- lm(mpg~wt+qsec+am+am:wt,data = mtTrain) #Fitting the linear model
+testPred &lt;- predict(modelfit, mtTest)               #Applying the fitted model to test  set
+testRMSE &lt;- sqrt(mean((mtTest$mpg-testPred)^2))     #Calculating test set RMSE
+</code></pre>
+
+<p>The test set RMS error is </p>
+
+<pre><code class="r">testRMSE
+</code></pre>
+
+<pre><code>## [1] 2.342093
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Model Performance on test data</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Table below shows that this model came pretty close to the actual mpg values for many cars in the test set. Thus, this model can be very usefull.(Simple data.frame code, which is used below is not shown(echo=F) for brevity.)</p>
+
+<pre><code>##                   predictedMPG actualMPG
+## Datsun 710            26.54088      22.8
+## Hornet Sportabout     17.08204      18.7
+## Valiant               20.72267      18.1
+## Merc 450SLC           17.16556      15.2
+## Honda Civic           31.65851      30.4
+## Toyota Corolla        31.62569      33.9
+## Toyota Corona         23.55352      21.5
+## Maserati Bora         12.64285      15.0
+</code></pre>
+
+<h3>Note</h3>
+
+<p>Since this predictor app is based on the mtcars dataset and the mtcars data set was compiled in 1974, this app will give reasonalble results for 1970s model cars. For modern cars it may not work so well.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='What does this application do?'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='How was this predictor app built?'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Code showing entire model building and calculation of RMS error on test set.'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Model Performance on test data'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
